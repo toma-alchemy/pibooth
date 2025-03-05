@@ -2,7 +2,7 @@
 
 import pibooth
 from pibooth import evts
-
+from pibooth.plugins.wled_api import WLEDAPI
 
 class LightsPlugin:
     """Plugin to manage the lights via GPIO.
@@ -13,13 +13,16 @@ class LightsPlugin:
     def __init__(self, plugin_manager):
         self._pm = plugin_manager
         self.blink_time = 0.3
-
+        self.wled = WLEDAPI("192.168.20.135")
     @pibooth.hookimpl
     def state_wait_enter(self, app):
         if app.previous_picture_file and app.printer.is_ready()\
                 and app.count.remaining_duplicates > 0:
             app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
         else:
+            self.wled.set_effect(184)
+            self.wled.set_brightness(100)
+            self.wled.on()
             app.leds.capture.blink(on_time=self.blink_time, off_time=self.blink_time)
             app.leds.printer.off()
 
@@ -35,10 +38,13 @@ class LightsPlugin:
     @pibooth.hookimpl
     def state_wait_exit(self, app):
         app.leds.off()
+        self.wled.off()
 
     @pibooth.hookimpl
     def state_choose_enter(self, app):
         app.leds.blink(on_time=self.blink_time, off_time=self.blink_time)
+        self.wled.set_effect(0)
+        self.wled.set_brightness(50)
 
     @pibooth.hookimpl
     def state_choose_exit(self, app):

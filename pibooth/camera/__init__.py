@@ -38,7 +38,7 @@ def find_camera():
     cv_cam_proxy = get_cv_camera_proxy()
     lib_cam_proxy = get_libcamera_camera_proxy()
 ## TA edit
-    ipweb_cam_proxy = get_ipwebcam_camera_proxy()
+    ipweb_cam_proxy = get_ipwebcam_camera_proxy("192.168.20.214")
 
 
     if lib_cam_proxy and gp_cam_proxy:
