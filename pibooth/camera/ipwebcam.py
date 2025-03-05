@@ -3,9 +3,9 @@ try:
 except ImportError:
     print("cv2 required!")
 
-from pibooth.camera.base import BaseCamera
+from pibooth.camera.opencv import CvCamera
 
-def get_ipwebcam_proxy(ipaddress=None):
+def get_ipwebcam_camera_proxy(ipaddress=None):
     if ipaddress is not None:
         if not isinstance(ipaddress, str):
             raise TypeError(f"IP address must be a string'{type(ipaddress)}'")
@@ -13,5 +13,12 @@ def get_ipwebcam_proxy(ipaddress=None):
         camera = cv2.VideoCapture(stream_url)
         if camera.isOpened():
             return camera
-        print("Couldn't connect to camera")
+        print("Couldn't connect to Ip Webcam")
     return None
+
+class IpWebCamera(CvCamera):
+    """Android Ip Camera management
+    """
+    
+    def __init__(self, camera_proxy):
+        super().__init__(camera_proxy)

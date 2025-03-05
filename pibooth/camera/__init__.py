@@ -6,9 +6,11 @@ from pibooth.camera.gphoto import GpCamera, get_gp_camera_proxy
 from pibooth.camera.opencv import CvCamera, get_cv_camera_proxy
 from pibooth.camera.libcamera import LibCamera, get_libcamera_camera_proxy
 from pibooth.camera.hybrid import HybridLibCamera, HybridRpiCamera, HybridCvCamera
+## TA edit
+from pibooth.camera.ipwebcam import IpWebCamera,get_ipwebcam_camera_proxy
 
 
-def close_proxy(rpi_cam_proxy, gp_cam_proxy, cv_cam_proxy, lib_cam_proxy):
+def close_proxy(rpi_cam_proxy, gp_cam_proxy, cv_cam_proxy, lib_cam_proxy,ipweb_cam_proxy):
     """Close proxy drivers.
     """
     if rpi_cam_proxy:
@@ -19,6 +21,10 @@ def close_proxy(rpi_cam_proxy, gp_cam_proxy, cv_cam_proxy, lib_cam_proxy):
         CvCamera(cv_cam_proxy).quit()
     if lib_cam_proxy:
         LibCamera(lib_cam_proxy).quit()
+
+## TA edit
+    if ipweb_cam_proxy:
+        IpWebCamera(ipweb_cam_proxy).quit()
 
 
 def find_camera():
@@ -31,34 +37,41 @@ def find_camera():
     gp_cam_proxy = get_gp_camera_proxy()
     cv_cam_proxy = get_cv_camera_proxy()
     lib_cam_proxy = get_libcamera_camera_proxy()
+## TA edit
+    ipweb_cam_proxy = get_ipwebcam_camera_proxy()
+
 
     if lib_cam_proxy and gp_cam_proxy:
         LOGGER.info("Configuring hybrid camera (Libcamera + gPhoto2) ...")
-        close_proxy(rpi_cam_proxy, None, cv_cam_proxy, None)
+        close_proxy(rpi_cam_proxy, None, cv_cam_proxy, None, ipweb_cam_proxy)
         return HybridLibCamera(lib_cam_proxy, gp_cam_proxy)
     if rpi_cam_proxy and gp_cam_proxy:
         LOGGER.info("Configuring hybrid camera (Picamera + gPhoto2) ...")
-        close_proxy(None, None, cv_cam_proxy, lib_cam_proxy)
+        close_proxy(None, None, cv_cam_proxy, lib_cam_proxy, ipweb_cam_proxy)
         return HybridRpiCamera(rpi_cam_proxy, gp_cam_proxy)
     if cv_cam_proxy and gp_cam_proxy:
         LOGGER.info("Configuring hybrid camera (OpenCV + gPhoto2) ...")
-        close_proxy(rpi_cam_proxy, None, None, lib_cam_proxy)
+        close_proxy(rpi_cam_proxy, None, None, lib_cam_proxy, ipweb_cam_proxy)
         return HybridCvCamera(cv_cam_proxy, gp_cam_proxy)
     if gp_cam_proxy:
         LOGGER.info("Configuring gPhoto2 camera ...")
-        close_proxy(rpi_cam_proxy, None, cv_cam_proxy, lib_cam_proxy)
+        close_proxy(rpi_cam_proxy, None, cv_cam_proxy, lib_cam_proxy, ipweb_cam_proxy)
         return GpCamera(gp_cam_proxy)
     if lib_cam_proxy:
         LOGGER.info("Configuring Libcamera camera ...")
-        close_proxy(rpi_cam_proxy, gp_cam_proxy, cv_cam_proxy, None)
+        close_proxy(rpi_cam_proxy, gp_cam_proxy, cv_cam_proxy, None, ipweb_cam_proxy)
         return LibCamera(lib_cam_proxy)
     if rpi_cam_proxy:
         LOGGER.info("Configuring Picamera camera ...")
-        close_proxy(None, gp_cam_proxy, cv_cam_proxy, lib_cam_proxy)
+        close_proxy(None, gp_cam_proxy, cv_cam_proxy, lib_cam_proxy, ipweb_cam_proxy)
         return RpiCamera(rpi_cam_proxy)
     if cv_cam_proxy:
         LOGGER.info("Configuring OpenCV camera ...")
-        close_proxy(rpi_cam_proxy, gp_cam_proxy, None, lib_cam_proxy)
+        close_proxy(rpi_cam_proxy, gp_cam_proxy, None, lib_cam_proxy, ipweb_cam_proxy)
         return CvCamera(cv_cam_proxy)
-
-    raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor Libcamera nor OpenCV camera detected")
+# TA edit
+    if ipweb_cam_proxy:
+        LOGGER.info("Configuring Ip Webcam camera ...")
+        close_proxy(rpi_cam_proxy, gp_cam_proxy, cv_cam_proxy, lib_cam_proxy, None)
+        return(IpWebCamera(ipweb_cam_proxy))
+    raise EnvironmentError("Neither Raspberry Pi nor GPhoto2 nor Libcamera nor OpenCV nor Ip Webcam camera detected")
